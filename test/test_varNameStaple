@@ -1,0 +1,19 @@
+#!/bin/bash
+
+_HOME_NOW="stuff"
+
+foo() {
+    eval _this=\$${1}_NOW
+    echo $_this
+}
+
+foo _HOME
+
+bar() {
+    _NOW=$1
+    if [ $1 = "partial" ]; then
+        echo $_NOW
+    fi
+}
+
+bar partial

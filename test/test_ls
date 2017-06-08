@@ -1,0 +1,12 @@
+#!/bin/bash
+
+arr=( $(find /home/maxx/tester/* -maxdepth 0 -type d) )
+echo ${#arr[@]}
+echo ${arr[@]}
+last=${#arr[@]}
+out=${arr[$last - 1]}/
+echo "Last = $last"
+echo "Last = $out"
+arr=( $(find $out* -maxdepth 0 -type d) )
+out=${arr[0]}
+echo "out = $out"

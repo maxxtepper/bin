@@ -1,0 +1,15 @@
+#!/bin/bash
+
+eval "$(ssh-agent -s)"
+ssh-add
+
+count=0
+
+for i in {1..1000}; do
+    rsync -avP pi@192.168.1.153:~/net_strm/output.txt ~/output.txt
+    if [ -s ~/output.txt ]; then
+        ((count++))
+    fi
+done
+
+echo "count = $count"

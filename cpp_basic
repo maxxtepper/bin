@@ -1,0 +1,11 @@
+#!/bin/bash
+#   Basic setup for a C++ program
+
+cat << _EOF_
+#include <iostream>
+
+int main(int argc, char *argv[]) {
+
+  return 0;
+}
+_EOF_

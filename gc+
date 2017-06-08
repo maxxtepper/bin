@@ -1,0 +1,32 @@
+#!/bin/bash
+
+version=$1
+
+if [[ -n "$version" ]]; then
+  # Check if this version exists
+  if ls /usr/bin/gcc-$version /usr/bin/g++-$version; then
+    sudo rm /usr/bin/gcc
+    sudo rm /usr/bin/g++
+    sudo ln -s /usr/bin/gcc-$version /usr/bin/gcc
+    sudo ln -s /usr/bin/g++-$version /usr/bin/g++
+  else
+    echo "Could not change gcc/g++ links: version-$version does not exist!" 1>&2
+    echo "Available versions:"
+    for f in /usr/bin/gcc-[0-9]*; do
+      echo "$f"
+    done
+    for f in /usr/bin/g++-[0-9]*; do
+      echo "$f"
+    done
+    exit 1
+  fi
+else
+  echo "Available versions:"
+  for f in /usr/bin/gcc-[0-9]*; do
+    echo "$f"
+  done
+  for f in /usr/bin/g++-[0-9]*; do
+    echo "$f"
+  done
+  exit 1
+fi

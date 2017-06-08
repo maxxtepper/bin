@@ -1,0 +1,20 @@
+#!/bin/bash
+
+var1="complete"
+var2="partial"
+
+if [ $var1 = "complete" ]; then
+    echo "var1 = complete!"
+    echo "$var1"
+else
+    echo "var2 = complete!"
+    echo "$var2"
+fi
+
+if [ $var1 = "partial" ]; then
+    echo "var1 = partial!"
+    echo "$var1"
+else    
+    echo "var2 = partial!"
+    echo "$var2"
+fi

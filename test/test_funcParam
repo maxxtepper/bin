@@ -1,0 +1,17 @@
+#!/bin/bash
+
+foo() {
+    while [ "$1" != "" ]; do 
+        case $1 in
+            1 )    shift
+                    echo "A 1 was passed!"
+                    ;;
+            2 )    shift
+                    echo "A 2 was passed!"
+                    ;;
+            * )     exit 1
+        esac
+    done
+}
+
+foo 1 2 1 2 2 1 1 2 1

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+_now=$(date +"%y%m%d_%H%M%S")
+_file="/home/maxx/backup_$_now.txt"
+echo "this is a test for file $_file..."
+
+#command --options "$_file"

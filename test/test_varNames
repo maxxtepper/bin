@@ -1,0 +1,11 @@
+#!/bin/bash
+
+_var="now"
+_id="ID"
+_now="NOW"
+
+echo "_var = $_var"
+
+_var=$_var/"$_id"_"$_now"
+
+echo "_var = $_var"

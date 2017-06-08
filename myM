@@ -1,0 +1,18 @@
+#!/bin/bash
+
+mode=$1
+
+if [[ -n "$mode" ]]; then
+  if [[ "$mode" == 0 ]]; then
+		sudo umount /dev/$2
+  fi
+  if [[ "$mode" == 1 ]]; then
+		sudo mount /dev/$2 /media/maxx/$3
+  fi
+else
+  echo "Usage: myM x y z"
+	echo "  x: 0=umount, 1=mount"
+	echo "  y: disk partition (ex: sde1)"
+	echo "  z: /media/maxx/z, z is directory"
+fi 
+

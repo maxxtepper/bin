@@ -1,0 +1,21 @@
+#!/bin/bash
+
+dir1="cluster"
+dir2="root"
+
+check_directory() {
+    local result=
+    if [ -d "$1" ]; then
+        result="yes"
+    else
+        result="no"
+    fi
+    echo "$result"
+}
+
+if [ $(check_directory "$dir1") = "yes" ]; then
+    echo "YAAAAAAY"
+else
+    echo "NOOOOOOO"
+fi
+

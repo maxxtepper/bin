@@ -1,0 +1,13 @@
+#!/bin/bash
+
+_send="now"
+
+foo() {
+    if [ $1 = "now" ]; then
+        echo "STUFF"
+    fi
+}
+
+if [ "$(foo $_send)" = "STUFF" ]; then
+    echo "Got STUFF!!"
+fi

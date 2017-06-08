@@ -1,0 +1,12 @@
+#!/bin/bash
+#   Basic setup for a LaTeX Document
+
+cat << _EOF_
+\documentclass[11pt]{article}
+
+\begin{document}
+
+
+
+\end{document}
+_EOF_

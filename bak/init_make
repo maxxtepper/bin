@@ -1,0 +1,21 @@
+#!/bin/bash
+
+cat << _EOF_
+CC=g++
+CFLAGS=-c -Wall -Werror
+LDFLAGS=
+SOURCES=
+OBJECTS=\$(SOURCES:.cpp=.o)
+EXECUTABLE=main
+
+all: \$(SOURCES) \$(EXECUTABLE)
+
+\$(EXECUTABLE): \$(OBJECTS)
+	\$(CC) \$(LDFLAGS) \$(OBJECTS) -o \$@
+
+.cpp.o:
+	\$(CC) \$(CFLAGS) $< -o \$@
+
+clean:
+	rm \$(OBJECTS) \$(EXECUTABLE)
+_EOF_

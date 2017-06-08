@@ -1,0 +1,16 @@
+#!/bin/bash
+
+mode=$1
+id=11
+
+if [[ -n "$mode" ]]; then
+  if [[ "$mode" == 0 ]]; then
+    xinput set-prop $id "Synaptics Tap Time" 0
+    xinput set-prop $id "Synaptics Palm Detection" 0
+  fi
+  if [[ "$mode" == 1 ]]; then
+    xinput set-prop $id "Synaptics Tap Time" 280
+  fi
+else
+  echo "tapT Usage: 0=off, 1=on"
+fi 

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+echo "CC=g++
+CFLAGS=-c -std=c++11 -fPIC \`root-config --cflags\`
+LDFLAGS=\`root-config --libs\`
+SOURCES=
+OBJECTS=\$(SOURCES:.cc=.o)
+LIBRARIES=
+EXECUTABLE=main
+
+all: \$(SOURCES) \$(EXECUTABLE)
+
+\$(EXECUTABLE): \$(OBJECTS)
+	\$(CC) \$(OBJECTS) -o \$@ \$(LIBRARIES) \$(LDFLAGS)
+
+.cc.o:
+	\$(CC) \$(CFLAGS) \$< -o \$@
+
+clean:
+	rm \$(OBJECTS) \$(EXECUTABLE)" > Makefile
+mkdir raw_root

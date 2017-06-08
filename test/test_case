@@ -1,0 +1,86 @@
+#!/bin/bash
+#   Practice taking user inputs (options) and using case to run script
+
+_HOME="/home/maxx/"
+_ROOT="/"
+
+bak_location=
+bak_type=
+
+dir_name=
+
+rsync_backup_home() {
+    echo "Backing home directory"
+    bak_location=$_HOME
+    echo "bak_location = $bak_location"
+    bool_bak_location=1
+    dir_name="_home_maxx"
+}
+
+rsync_backup_root() { echo "Backing root directory" bak_location=$_ROOT
+    echo "Backing / directory"
+    bak_location=$_ROOT
+    echo "bak_location = $bak_location"
+    bool_bak_location=1
+}
+
+rsync_complete() {
+    echo "Doing a complete backup"
+    bak_type="complete"
+    echo "bak_type = $bak_type"
+    bool_bak_type=1
+    dir_name="$dir_name.complete"
+}
+
+rsync_partial() {
+    echo "Doing a partial backup"
+    bak_type="partial"
+    echo "bak_type = $bak_type"
+    bool_bak_type=1
+}
+    
+
+usage() {
+    echo "usage means some key that doesnt matter"
+}
+
+#####   Main    #####
+
+if [ $bak_type ]; then
+    echo "bak_type is not empty"
+else
+    echo "bak_type is empty"
+fi
+    
+while [ "$1" != "" ]; do
+    case $1 in
+        -h | --home )       shift
+                            rsync_backup_home
+                            ;;
+        -r | --root )       shift
+                            rsync_backup_root
+                            ;;
+        -c | --complete )   shift
+                            rsync_complete
+                            ;;
+        -p | --partial )    shift
+                            rsync_partial
+                            ;;
+        * )                 usage
+                            exit 1
+    esac
+done     
+
+if [[ -n $bak_type && -n $bak_location ]]; then
+    echo "Great, a $bak_type backup of $bak_location will commence!!"
+    echo "Directory name= $dir_name"
+else
+    echo "Incorrect arguments!!!"
+fi
+
+
+if [ $bak_type ]; then
+    echo "bak_type is not empty"
+else
+    echo "bak_type is empty"
+fi

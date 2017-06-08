@@ -1,0 +1,17 @@
+#!/bin/bash
+#   Arduino basic setup
+
+cat << _EOF_
+/*
+ *
+ *
+*/
+
+void setup(void) {
+
+}
+
+void loop(void) {
+
+}
+_EOF_

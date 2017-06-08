@@ -1,0 +1,5 @@
+#!/bin/bash
+
+_TEST="mkdir test"
+
+$_TEST

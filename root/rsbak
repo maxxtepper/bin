@@ -1,0 +1,285 @@
+#!/bin/bash
+#   Script to back up the home directory using rsync
+#   COMPLETE: This is to do a complete backup. The procedure will simply create a new directory
+#             dated with the current time and do a full backup of the /home/maxx/
+
+#============================================================================================================
+##################################    Variables     #########################################################
+#============================================================================================================
+
+# _complete       :     /backup/rsync/home/maxx/_home_maxx.$_NOW.complete
+# _complete_parent:     /backup/rsync/home/maxx/_home_maxx.$_NOW.complete/_home_maxx.$_NOW.parent
+#       The complete_parent directory will be created independent of anything else when a complete backup is desired
+# _partial:             $_complete/_home_maxx.$_NOW
+#       The partial directory will be created, but inside of the most recent complete directory, and linked to the parent directory
+#       in that complete directory
+
+_NOW=$(date +"%y%m%d_%H%M%S")
+
+# Preset names for what to backup and where
+_HOME_IN="/home/maxx/"
+_ROOT_IN="/"
+_DRIVE_IN="/home/maxx/myDrive_000/"
+
+_HOME_COM="/backup/rsync/home/maxx"
+_ROOT_COM="/media/maxx/Ntyson/backup/rsync/root"
+_DRIVE_COM="/media/maxx/myDrive_000"
+
+_HOME_ID="_home_maxx"
+_ROOT_ID="_root"
+_DRIVE_ID="_drive"
+
+_bak_in=
+_bak_com=
+_bak_id=
+
+_complete=
+_complete_parent=
+
+# To setup the backup
+_bak_type=
+
+_bak_log=
+
+# For excludes
+_HOME_EXC="$_HOME_COM/.excludes.txt"
+_ROOT_EXC="$_ROOT_COM/.excludes.txt"
+_DRIVE_EXC="$_DRIVE_COM/.excludes.txt"
+
+_bak_exc_tmp=
+_bak_exc=
+
+_incomplete=
+_destination=
+
+#============================================================================================================
+##################################    Functions    ##########################################################
+#============================================================================================================
+
+rsync_backup() {
+    eval _bak_in=\$${1}_IN
+    eval _bak_com=\$${1}_COM
+    eval _bak_id=\$${1}_ID
+    eval _bak_exc_tmp=\$${1}_EXC
+    echo "_bak_com set to $_bak_com"
+}
+
+find_complete() {
+    ls_array=( $(find $_bak_com/_* -maxdepth 0 -type d) )
+    ls_last=${#ls_array[@]}
+    _complete=${ls_array[$ls_last -1]}
+    # Echo out complete for _bak_com
+    echo "$_complete"
+}
+
+find_complete_parent() {
+    ls_array=( $(find $_bak_com/_*.parent -maxdepth 0 -type d) )
+    ls_last=${#ls_array[@]}
+    _complete_parent=${ls_array[$ls_last -1]}
+    echo "$_complete_parent"
+}
+
+rsync_type() {
+    _bak_type=$1
+    if [ $_bak_type = "partial" ]; then
+        _complete=$(find_complete)
+        _bak_com=$_complete
+        _complete_parent=$(find_complete_parent)
+        echo "_complete_parent=$_complete_parent"
+        echo "rsync_type --> partial"
+    elif [ $_bak_type = "complete" ]; then
+        _bak_com=$_bak_com/"$_bak_id"."$_NOW".complete
+        echo "rsync_type --> complete"
+    fi
+    _bak_exc="$_bak_com/excludes"
+    _bak_log="$_bak_com/log_files"
+}
+
+check_directory() {
+    # Check to see if a directory exists
+#    echo "check_directory got $1"
+    if [ -d "$1" ]; then
+        echo "yes"
+    else
+        echo "no"
+    fi
+}
+
+rsync_prep() {
+    # Check complete or partial
+    # ~~~~~COMPLETE~~~~~
+    if [ "$_bak_type" = "complete" ]; then
+        # Prepare final names for directories and files
+        _incomplete=$_bak_com/"$_bak_id".incomplete
+        _destination=$_bak_com/"$_bak_id"."$_NOW".parent
+        _complete_parent=$_bak_com
+        echo "_incomplete=$_incomplete"
+        echo "_destination=$_destination"
+     
+        # Make neccassarry directories
+        echo "Making directory $_incomplete"
+        sudo mkdir -p "$_incomplete"
+#        sudo chmod 755 $_bak_com
+        
+        echo "Making directory $_bak_com"
+        sudo mkdir -p "$_bak_com"
+#        sudo chmod 755 $_bak_com
+
+        echo "Making directory $_bak_log"
+        sudo mkdir -p "$_bak_log"
+#        sudo chmod 755 $_bak_log
+        _bak_log=$_bak_log/"$_bak_id"_"$_NOW.log"
+
+        echo "Making directory $_bak_exc"
+        sudo mkdir -p "$_bak_exc"
+#        sudo chmod 755 $_bak_exc
+        
+        _bak_exc=$_bak_exc/"$_bak_id"_"$_NOW"_excludes.txt
+        echo "_bak_exc=$_bak_exc"
+
+        if [ -f $_bak_exc_tmp ]; then
+            echo "_bak_exc_tmp exists!!: $_bak_exc_tmp"
+        fi
+        echo "Copying excludes.txt into excludes"
+        sudo cp $_bak_exc_tmp $_bak_exc
+
+    # ~~~~~PARTIAL~~~~~
+    elif [ "$_bak_type" = "partial" ]; then
+        # Look for necessary directories to make sure they exist
+        echo "Sending _bak_com=$_bak_com to check_directory"
+        if [ "$(check_directory $_bak_com)" = "yes" ]; then
+            echo "Found $_bak_com?.....yes"
+        else
+            echo "Found $_bak_com?.....no"
+            usage 2
+            exit 1
+        fi
+        
+        if [ "$(check_directory "$_bak_log")" = "yes" ]; then
+            echo "Found $_bak_log?.....yes"
+            _bak_log=$_bak_log/"$_bak_id"_"$_NOW".log
+        else
+            echo "Found $_bak_log?.....no"
+            usage 2
+            exit 1
+        fi
+        
+        if [ "$(check_directory "$_bak_exc")" = "yes" ]; then
+            echo "Found $_bak_exc?.....yes"
+            _bak_exc=$_bak_exc/"$_bak_id"_"$_NOW"_excludes.txt
+        else
+            echo "Found $_bak_exc?.....no"
+            usage 2
+            exit 1
+        fi
+        
+        echo "Copying excludes.txt into excludes"
+        sudo cp $_bak_exc_tmp $_bak_exc
+        
+        # Prepare final names for directories and files
+        _incomplete=$_bak_com/"$_bak_id".incomplete
+        _destination=$_bak_com/"$_bak_id".$_NOW
+    fi
+}
+
+rsync_commence() {
+    # Now make the backup
+    echo "The backup is being made"
+    #rsync --archive --info=progress2 --one-file-system --hard-links --human-readable --inplace --numeric-ids --delete --delete-excluded --log-file=$_bak_log --exclude-from=$_bak_exc --link-dest=$_complete_parent $_bak_in $_incomplete
+    rsync --archive --recursive --compress --info=progress2 --one-file-system --links --perms --executability --hard-links --times --human-readable --inplace --numeric-ids --delete --delete-excluded --log-file=$_bak_log --exclude-from=$_bak_exc --link-dest=$_complete_parent $_bak_in $_incomplete
+
+    #   After completion
+    sudo mv $_incomplete $_destination
+}
+
+usage() {
+    case $1 in
+        1 )         echo "rsbak [-what] [-type]"
+                    echo "-what ---> -h | --home  == backup home directory /home/maxx/"
+                    echo "           -r | --root  == backup root directory /"
+                    echo "           -d | --drive == backup drive directory /home/maxx/drive/"
+                    echo "-type ---> -c | --complete == do a fresh complete backup"
+                    echo "           -p | --partial  == do a partial backup to the last complete backup"
+                    echo "example: rsbak --home --complete"
+                    ;;
+        2 )         echo "some directory did not exist...possible no complete exists? Try running a complete backup"
+                    ;;
+    esac
+}
+
+#============================================================================================================
+##################################    Main    ###############################################################
+#============================================================================================================
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -h | --home )           shift
+                                rsync_backup "_HOME"
+                                ;;
+        -r | --root )           shift
+                                rsync_backup "_ROOT"
+                                ;;
+        -d | --drive)           shift
+                                rsync_backup "_DRIVE"
+                                ;;
+        -c | --complete )       shift
+                                rsync_type "complete"
+                                ;;
+        -p | --partial )        shift
+                                rsync_type "partial"
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+done
+
+if [[ -n $_bak_type && -n $_bak_in ]]; then
+    echo "preparing rsync..."
+    rsync_prep $_bak_type
+    echo "rsync commencing: $_bak_type backup of $_bak_in"
+    rsync_commence
+else
+    echo "Parameters not met!"
+    usage 1
+    exit 1
+fi
+
+echo "Backup complete!"
+
+#===================================================================================================================================================================
+
+#rsync --archive --one-file-system --hard-links --human-readable --inplace --numeric-ids --delete --delete-excluded --log-file="$_log_file" --exclude-from="$_excludes" --link-dest="$_complete_parent" "$_bak_what_name" "$_incomplete"
+
+#===================================================================================================================================================================
+
+# rsync: the command for using rsync
+
+# --archive: This causes rsync to backup (they call it "preserve) things like file permissions, ownerships, and timestamps
+
+# --one-file-system: This causes rsync to NOT recurse into the file systems. If you use this like I do then you must backup each file system (mount point) one at a time. The alternative is to simply backup / and exlude things you don't want to backup (like /proc, /sys, /tmp, and any network or removable media mounts)
+
+# --hard-links: This causes rsync to maintain hard links that are on the server being backed up. This has nothing to do with the hard links used during the rotation
+
+# --human-readable: This tells rsync to output numbers of bytes with K, M, G, or T suffices instead of just long strings of digits
+
+# --inplace: This tells rsync to update files on the target at the block level instead of building a temporary replacement file. It id s dignificsnt performance improvement however it should not be used for things other than backups or if your version of rsync is old enough that --inplace is incompatbile with --link-dest
+
+# --numerical-ids: This tells rsync to not attempt to translate UID <> userid or GID <> groupid. This is very important when doing backups and restores. If you are doing a restore from a live cd such as SystemRescueCD or Knoppix your file ownershi[s will be completely screwed up if you leave this out
+
+# --delete: This tells rsync to delete files that are no longer on the server from the backup. This is less important when using --link-dest because you should be backing up to an empty directory so there would be nothing to delete however I include it because of the possibility that the *.incomplete directory I am backing up to is actually left over from a previous failed run and may have things to delete
+
+# --delete-excluded: This tells rsync that it can delete stuff from a previous backup that is now within the excluded list
+
+# --exclude-from=excludes.txt: This is a plain text files with a list of paths that I do not want backed up. The format of the file is simply one path per line. I tend to add things that will always be changing but are unimportant such as unimportant log and temp files. If you have a ~./gvfs entry you should add it too as it will cause a non-fatal error
+
+# --link-dest: This is the most recent complete backup that was current when we started. We are telling rsync to link to this backup for any files that have not changed
+
+# /home/maxx/: This is the path on the server that is to be backed up. Note that the trailing slash IS significant
+
+# /backup/rsync/maxx/_home_maxx.incomplete/: This is the empty directory we are going to backup to. It should be created with mkdir -p first. If the directory exists from a previous failed or aborted backup it will simply be completed. This trailing slash is not significant but I prefer to have it
+
+# --verbose: This causes rsync to list each file that it touches
+
+# --progress: This addes to the verbosity and tells rsync to print out a %completion and transfer speed while transferring each file
+
+# --itemize-changes: This adds to the file list a string of characters that explains why rsync believes each file needs to be touched. See the man page for the explination of the characters

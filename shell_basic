@@ -1,0 +1,5 @@
+#/bin/bash
+#   For starting a shell script
+cat << _EOF_
+#!/bin/bash
+_EOF_
