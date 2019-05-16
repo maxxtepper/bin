@@ -14,6 +14,25 @@
 #       The partial directory will be created, but inside of the most recent complete directory, and linked to the parent directory
 #       in that complete directory
 
+# Read the file in parameter and fill the array named "array"
+getArray() {
+	array=() # Create array
+	while IFS= read -r line; do # Read a line
+		array+=("$line") # Append line to the array
+	done < "$1"
+}
+
+# Call the function on the pre-defined file and name and scheme
+getArray "config_rsbak.txt"
+
+# Print the file (print each element of the array
+for e in "${array[@]}"; do
+	echo "$e"
+done
+
+# IMPORTANT NOTE
+# I am going to write a script that runs this script for multiple systems at scheduled times and days, with a specific scheme in mind: a complete will be done every 30 days, and a partial is day everyday there is not a complete. Then, a full complete, with all of its partial data, can be compressed and stored for long-term use.
+
 _NOW=$(date +"%y%m%d_%H%M%S")
 
 # Read in, from a file, names for what to backup...
