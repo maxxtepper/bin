@@ -36,18 +36,13 @@ done
 _NOW=$(date +"%y%m%d_%H%M%S")
 
 # Read in, from a file, names for what to backup...
-_HOME_IN="/space/user/"
-_ROOT_IN="/"
-_DRIVE_IN="/space/user/myDrive_000/"
+_HOME_IN=$array[1]
 
 # ...and where to back it up
-_HOME_COM="/backup/rsync/space/user"
-_ROOT_COM="/media/user/Ntyson/backup/rsync/root"
-_DRIVE_COM="/media/user/myDrive_000"
+_HOME_COM=$array[2]
 
-_HOME_ID="_space_user"
-_ROOT_ID="_root"
-_DRIVE_ID="_drive"
+# The ID
+_HOME_ID=$array[3]
 
 _bak_in=
 _bak_com=
@@ -63,8 +58,6 @@ _bak_log=
 
 # For excludes
 _HOME_EXC="$_HOME_COM/.excludes.txt"
-_ROOT_EXC="$_ROOT_COM/.excludes.txt"
-_DRIVE_EXC="$_DRIVE_COM/.excludes.txt"
 
 _bak_exc_tmp=
 _bak_exc=
@@ -215,12 +208,10 @@ rsync_commence() {
 usage() {
     case $1 in
         1 )         echo "rsbak [-what] [-type]"
-                    echo "-what ---> -h | --home  == backup home directory /home/maxx/"
-                    echo "           -r | --root  == backup root directory /"
-                    echo "           -d | --drive == backup drive directory /home/maxx/drive/"
+                    echo "-what ---> -r | --run  == make backup from config file"
                     echo "-type ---> -c | --complete == do a fresh complete backup"
                     echo "           -p | --partial  == do a partial backup to the last complete backup"
-                    echo "example: rsbak --home --complete"
+                    echo "example: rsbak --run --complete"
                     ;;
         2 )         echo "some directory did not exist...possible no complete exists? Try running a complete backup"
                     ;;
@@ -233,14 +224,8 @@ usage() {
 
 while [ "$1" != "" ]; do
     case $1 in
-        -h | --home )           shift
+        -r | --run )           	shift
                                 rsync_backup "_HOME"
-                                ;;
-        -r | --root )           shift
-                                rsync_backup "_ROOT"
-                                ;;
-        -d | --drive)           shift
-                                rsync_backup "_DRIVE"
                                 ;;
         -c | --complete )       shift
                                 rsync_type "complete"

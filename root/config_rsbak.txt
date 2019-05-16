@@ -1,0 +1,3 @@
+/home/maxx/scripts/
+/media/user/NTyson/backup/rsync/scripts
+_home_maxx
